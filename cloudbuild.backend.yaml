@@ -1,0 +1,57 @@
+steps:
+  # 1. Build backend container using Dockerfile.backend
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-f'
+      - 'Dockerfile.backend'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/mevreon/ayush-bioai-repo/ayush-live-backend:latest'
+      - '.'
+    timeout: 1200s
+
+  # 2. Push image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'us-central1-docker.pkg.dev/mevreon/ayush-bioai-repo/ayush-live-backend:latest'
+
+  # 3. Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'ayush-live-backend'
+      - '--image'
+      - 'us-central1-docker.pkg.dev/mevreon/ayush-bioai-repo/ayush-live-backend:latest'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--port'
+      - '8080'
+      - '--memory'
+      - '2Gi'
+      - '--cpu'
+      - '2'
+      - '--min-instances'
+      - '0'
+      - '--max-instances'
+      - '5'
+      - '--timeout'
+      - '300s'
+      - '--no-invoker-iam-check'
+      - '--ingress'
+      - 'all'
+      - '--set-env-vars'
+      - 'RUN_MODE=production,PYTHONUNBUFFERED=1'
+
+images:
+  - 'us-central1-docker.pkg.dev/mevreon/ayush-bioai-repo/ayush-live-backend:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'
+
+timeout: 1800s

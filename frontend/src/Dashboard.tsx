@@ -18,7 +18,8 @@ import {
   HelpCircle,
   Download,
   ArrowLeft,
-  Printer
+  Printer,
+  Zap
 } from 'lucide-react';
 import { MoleculeViewer } from './components/MoleculeViewer';
 import { MechanismGraph } from './components/MechanismGraph';
@@ -137,13 +138,15 @@ interface DashboardProps {
   initialOrganism?: string;
   initialTarget?: string;
   onBackToLanding?: () => void;
+  onOpenLiveStudio?: () => void;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
   onOpenDetail,
   initialOrganism = 'pseudomonas',
   initialTarget = 'PqsR',
-  onBackToLanding
+  onBackToLanding,
+  onOpenLiveStudio
 }) => {
   // ── States ──
   const [selectedOrganism, setSelectedOrganism] = useState<string>(initialOrganism);
@@ -352,6 +355,18 @@ const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-3 relative z-10">
+          {/* Live Docking Studio Launch Button */}
+          {onOpenLiveStudio && (
+            <button
+              onClick={onOpenLiveStudio}
+              className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 text-xs font-black shadow-[0_0_20px_rgba(6,182,212,0.5)] transition animate-pulse"
+              title="Launch Real-Time Live Docking Studio"
+            >
+              <Zap className="w-3.5 h-3.5 fill-current" />
+              <span>Live Docking Studio</span>
+            </button>
+          )}
+
           {/* Back to Landing Page Button */}
           {onBackToLanding && (
             <button
@@ -412,6 +427,16 @@ const Dashboard: React.FC<DashboardProps> = ({
           <span className="text-slate-500">|</span>
           <span className="text-slate-300">12 Targets × 24 Ayush Compounds (0ms Instant Load)</span>
         </div>
+
+        {onOpenLiveStudio && (
+          <button
+            onClick={onOpenLiveStudio}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-cyan-950 hover:bg-cyan-900 text-cyan-300 border border-cyan-500/50 text-[11px] font-bold font-mono transition"
+          >
+            <Zap className="w-3 h-3 text-cyan-400 animate-pulse" />
+            Test Live Docking (AutoDock Vina + DiffDock) →
+          </button>
+        )}
       </div>
 
       {/* ── Pathogen Organism Segregation Tabs Row ── */}

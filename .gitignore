@@ -53,5 +53,11 @@ temp/
 *.log
 *.zip
 
+# Large media & generated clips
+*.mp4
+*.pdf
+outputs/walkthrough_clips/
+outputs/clip_test_*.png
+
 # History files
 hist_cmds

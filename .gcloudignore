@@ -48,3 +48,5 @@ FIX_SUMMARY.md
 
 # Large log files
 *.log
+*.mp4
+*.pdf

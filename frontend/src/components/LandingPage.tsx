@@ -8,13 +8,15 @@ import {
   FileSearch,
   Layers,
   Beaker,
-  Dna
+  Dna,
+  Zap
 } from 'lucide-react';
 
 interface LandingPageProps {
   onSelectOrganism: (organismId: string, targetId?: string) => void;
   onOpenCustomTester?: () => void;
   onOpenSwissTarget?: () => void;
+  onOpenLiveStudio?: () => void;
 }
 
 /* ── Intersection Observer Hook for Scroll Reveals ── */
@@ -86,7 +88,8 @@ function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: str
 /* ── Main Landing Page Component ── */
 export const LandingPage: React.FC<LandingPageProps> = ({
   onSelectOrganism,
-  onOpenSwissTarget
+  onOpenSwissTarget,
+  onOpenLiveStudio
 }) => {
   const scrollContainerRef = useScrollReveal();
   const [heroLoaded, setHeroLoaded] = useState(false);
@@ -134,14 +137,23 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               AYUSH <span className="text-teal-400">Bio-AI</span>
             </span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            {onOpenLiveStudio && (
+              <button
+                onClick={onOpenLiveStudio}
+                className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-gradient-to-r from-cyan-950 to-teal-950 hover:from-cyan-900 hover:to-teal-900 text-cyan-300 border border-cyan-500/60 text-xs font-bold transition-all duration-300 shadow-[0_0_20px_rgba(6,182,212,0.3)] animate-pulse"
+              >
+                <Zap className="w-3.5 h-3.5 text-cyan-400 fill-current" />
+                ⚡ Live Docking Studio
+              </button>
+            )}
             {onOpenSwissTarget && (
               <button
                 onClick={onOpenSwissTarget}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 text-cyan-300 border border-cyan-700/60 text-xs font-bold transition-all duration-300"
+                className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 text-cyan-300 border border-cyan-700/60 text-xs font-bold transition-all duration-300"
               >
                 <Dna className="w-3.5 h-3.5 text-cyan-400" />
-                SwissTarget Predictions (Human)
+                SwissTarget Predictions
               </button>
             )}
             <button

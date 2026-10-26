@@ -855,7 +855,53 @@ def reset_custom_run():
         "status": "Idle", "progress": 0, "logs": [], "elapsed": 0.0,
         "start_time": None, "error": None, "result": None, "run_id": None
     }
-    return {"status": "reset", "message": "Custom run state cleared."}
+# --- Live Multi-Model Docking Endpoints ---
+from api.live_docking_service import (
+    fetch_target_structure,
+    fetch_ligand_from_pubchem,
+    execute_live_docking_pipeline
+)
+
+class LiveDockRequest(BaseModel):
+    target: str = "pqsr"
+    ligand: str = "curcumin"
+    compound_name: Optional[str] = None
+
+@app.get("/api/live/fetch-target")
+def get_live_target(query: str):
+    """Fetch target details from local registry or live from RCSB PDB."""
+    try:
+        data = fetch_target_structure(query)
+        return {
+            "status": "success",
+            "target_id": data["target_id"],
+            "target_name": data["target_name"],
+            "organism": data["organism"],
+            "pdb_id": data["pdb_id"],
+            "center": data["center"],
+            "size": data["size"],
+            "atom_count": data["atom_count"]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/api/live/fetch-ligand")
+def get_live_ligand(query: str):
+    """Query chemical details and SMILES from PubChem REST API."""
+    try:
+        data = fetch_ligand_from_pubchem(query)
+        return {"status": "success", "data": data}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/api/live/dock")
+def run_live_docking_endpoint(req: LiveDockRequest):
+    """Execute live AutoDock Vina + DiffDock-L docking, bond calculation, and priority scoring."""
+    try:
+        result = execute_live_docking_pipeline(req.target, req.ligand, req.compound_name)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Docking execution failed: {str(e)}")
 
 # Mount React static files if the production build exists
 react_dist = BASE_DIR / "frontend" / "dist"
