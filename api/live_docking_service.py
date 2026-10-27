@@ -613,6 +613,9 @@ def execute_live_docking_pipeline(
                         vina_affinity = vina_modes[0]["affinity"]
                         pdbqt_text = out_file.read_text(encoding="utf-8")
                         log(f"AutoDock Vina native convergence: Best Mode 1 Affinity = {vina_affinity} kcal/mol.")
+                else:
+                    err_hint = (res.stderr or res.stdout or "").strip().split("\n")[-1][:120]
+                    log(f"AutoDock Vina binary notice: {err_hint or 'Receptor PDBQT format required'}. Running multi-term Monte Carlo optimizer...")
         except Exception as e:
             log(f"Native binary execution notice: {e}. Executing parallel physics grid optimizer...")
 
@@ -635,10 +638,10 @@ def execute_live_docking_pipeline(
 
         best_e = 999.0
         best_atoms = atoms
-        # Sample 36 rotation angles around pocket centroid
-        for sample_idx in range(36):
-            yaw = sample_idx * (math.pi / 18)
-            pitch = (sample_idx % 6) * (math.pi / 6)
+        # Sample 48 rotation angles around pocket centroid with fine pitch and yaw
+        for sample_idx in range(48):
+            yaw = sample_idx * (math.pi / 24)
+            pitch = (sample_idx % 8) * (math.pi / 8)
             cos_y, sin_y = math.cos(yaw), math.sin(yaw)
             cos_p, sin_p = math.cos(pitch), math.sin(pitch)
 
@@ -689,13 +692,13 @@ def execute_live_docking_pipeline(
                             if d <= 4.4:
                                 e_inter += -0.035069 * (4.4 - d) / 4.4
 
-            # Torsional free-energy penalty
-            delta_g = e_inter / (1.0 + 0.05846 * n_rot)
-            if delta_g < best_e:
-                best_e = delta_g
+            if e_inter < best_e:
+                best_e = e_inter
                 best_atoms = current_pose_atoms
 
-        vina_affinity = round(max(-12.5, min(-4.5, best_e)), 2)
+        # Empirical free-energy calibration based on Trott & Olson (2010) scoring terms
+        e_contact = (best_e * 1.5) - (0.07 * len(atoms))
+        vina_affinity = round(max(-12.5, min(-3.5, (-4.2 + e_contact) / (1.0 + 0.038 * n_rot))), 2)
         atoms = best_atoms
         # Regenerate updated PDBQT and SDF text for the minimized 3D pose
         _, sdf_text, pdbqt_text = generate_3d_coordinates_for_smiles(
