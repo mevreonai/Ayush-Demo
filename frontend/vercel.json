@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:match*",
-      "destination": "https://ayush-live-backend-1077656215528.us-central1.run.app/api/:match*"
+      "destination": "https://ayush-live-backend-itqxq5fx4a-uc.a.run.app/api/:match*"
     },
     {
       "source": "/(.*)",
